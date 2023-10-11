@@ -1,7 +1,10 @@
-// Import required modules
 const http = require('http');
-const fs = require('fs').promises; // Use fs.promises for Promises
+const fs = require('fs').promises;
 const path = require('path');
+const express = require('express');
+
+const app = express();
+const server = http.createServer(app);
 
 // Define a function to handle API requests
 const handleApiRequest = async (req, res) => {
@@ -45,20 +48,21 @@ const handleApiRequest = async (req, res) => {
   }
 };
 
-// Create an HTTP server
-const server = http.createServer(async (req, res) => {
-  if (req.url.startsWith('/api/')) {
-    // Forward API requests to the handleApiRequest function
-    await handleApiRequest(req, res);
-  } else {
-    // Handle non-API requests
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Welcome to Jaedens clothing brand');
-  }
+// Serve the React app from the "build" directory
+app.use(express.static(path.join(__dirname, 'my-react-app/build')));
+
+// Define a route for your API
+app.get('/api/v1/users', async (req, res) => {
+  // Forward API requests to the handleApiRequest function
+  await handleApiRequest(req, res);
+});
+
+// Define a route for the root (React app)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'my-react-app/build', 'index.html'));
 });
 
 // Start the server on port 3000
 server.listen(3000, () => {
-  console.log('Server running on <http://localhost:3000/>');
+  console.log('Server running on http://localhost:3000/');
 });
-
